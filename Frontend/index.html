@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant</title>
+    <link rel="stylesheet" href="css/indexCss.css">
+</head>
+<body>
+    <!-- Menú lateral desplegable -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Historial de Chats</h3>
+            <button class="toggle-btn" id="toggleBtn">☰</button>
+        </div>
+        <div class="chat-history" id="chatHistory">
+            <!-- Los chats se agregarán dinámicamente aquí -->
+        </div>
+        <div class="sidebar-footer">
+            <button class="new-chat-btn" id="newChatBtn">+ Nuevo Chat</button>
+        </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="main-content" id="mainContent">
+        <!-- Área central con mensaje de bienvenida -->
+        <div class="welcome-section">
+            <div class="ai-avatar">
+                <div class="avatar-circle">
+                    <img src="assets/IApfp.jpg" alt="AI Assistant Avatar" class="ai-image">
+                </div>
+            </div>
+            <h1 class="welcome-message">Hola Mario, ¿Como has estado?</h1>
+        </div>
+
+        <!-- Área de chat (inicialmente oculta) -->
+        <div class="chat-container" id="chatContainer" style="display: none;">
+            <div class="chat-messages" id="chatMessages">
+                <!-- Los mensajes del chat aparecerán aquí -->
+            </div>
+        </div>
+
+        <!-- Input de texto en la parte inferior -->
+        <div class="input-section">
+            <div class="input-container">
+                <textarea 
+                    id="messageInput" 
+                    placeholder="¿De qué quieres hablar hoy?"
+                    rows="1"
+                ></textarea>
+                <button class="send-btn" id="sendBtn">
+                    <span class="send-icon">➤</span>
+                </button>
+                <button class="voice-btn" id="voiceBtn" title="Cambiar a modo chat de voz">
+                    <span class="voice-icon">🎤</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay para móviles -->
+    <div class="overlay" id="overlay"></div>
+
+    <script src="javascript/indexJs.js"></script>
+</body>
+</html>
