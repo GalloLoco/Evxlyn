@@ -34,8 +34,8 @@ class AIChatbot {
 
     // ===== CONFIGURACIÓN DE EVENT LISTENERS =====
     setupEventListeners() {
-        // Botón toggle del sidebar
-        this.toggleBtn.addEventListener('click', () => this.toggleSidebar());
+        // Botón toggle del sidebar (dentro del sidebar)
+        this.toggleBtn.addEventListener('click', () => this.closeSidebar());
         
         // Nuevo chat
         this.newChatBtn.addEventListener('click', () => this.createNewChat());
@@ -60,12 +60,40 @@ class AIChatbot {
         // Cerrar sidebar en móvil al hacer click en overlay
         this.overlay.addEventListener('click', () => this.closeSidebar());
         
-        // Cerrar sidebar al redimensionar ventana
+        // Cerrar sidebar al redimensionar ventana y manejar botón flotante
         window.addEventListener('resize', () => {
             if (window.innerWidth > 768) {
                 this.overlay.classList.remove('active');
             }
+            this.handleResponsiveMenuButton();
         });
+        
+        // Tecla Escape para cerrar sidebar
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.sidebar.classList.contains('active')) {
+                this.closeSidebar();
+            }
+        });
+    }
+    handleResponsiveMenuButton() {
+        if (!this.menuToggleBtn) return;
+        
+        const sidebarIsActive = this.sidebar.classList.contains('active');
+        
+        if (window.innerWidth > 768 && sidebarIsActive) {
+            // En desktop, si el sidebar está abierto, ocultar botón flotante
+            this.menuToggleBtn.classList.add('hidden');
+        } else if (window.innerWidth <= 768) {
+            // En móvil, comportamiento normal (botón se oculta cuando sidebar está activo)
+            if (sidebarIsActive) {
+                this.menuToggleBtn.classList.add('hidden');
+            } else {
+                this.menuToggleBtn.classList.remove('hidden');
+            }
+        } else {
+            // En desktop con sidebar cerrado, mostrar botón flotante
+            this.menuToggleBtn.classList.remove('hidden');
+        }
     }
 
     // ===== CREAR BOTÓN DE MENÚ FLOTANTE =====
@@ -73,8 +101,14 @@ class AIChatbot {
         const menuToggle = document.createElement('button');
         menuToggle.className = 'menu-toggle';
         menuToggle.innerHTML = '☰';
+        menuToggle.setAttribute('aria-label', 'Abrir menú de historial');
         menuToggle.addEventListener('click', () => this.toggleSidebar());
         document.body.appendChild(menuToggle);
+        
+        // Guardar referencia al botón flotante
+        this.menuToggleBtn = menuToggle;
+        
+        console.log('📱 Botón de menú flotante creado');
     }
 
     // ===== GESTIÓN DEL SIDEBAR =====
@@ -92,20 +126,44 @@ class AIChatbot {
         this.sidebar.classList.add('active');
         this.mainContent.classList.add('sidebar-open');
         
+        // Ocultar el botón flotante con animación
+        if (this.menuToggleBtn) {
+            this.menuToggleBtn.classList.add('hidden');
+            this.menuToggleBtn.setAttribute('aria-hidden', 'true');
+        }
+        
         // En móvil, mostrar overlay
         if (window.innerWidth <= 768) {
             this.overlay.classList.add('active');
         }
+        
+       // console.log('📂 Sidebar abierto - Botón flotante oculto');
     }
-
+    
     closeSidebar() {
         this.sidebar.classList.remove('active');
         this.mainContent.classList.remove('sidebar-open');
         this.overlay.classList.remove('active');
+        
+        // Mostrar el botón flotante con animación
+        if (this.menuToggleBtn) {
+            this.menuToggleBtn.classList.remove('hidden');
+            this.menuToggleBtn.setAttribute('aria-hidden', 'false');
+        }
+        
+       // console.log('📂 Sidebar cerrado - Botón flotante visible');
     }
-
+    
     // ===== GESTIÓN DE CHATS =====
     createNewChat() {
+        // Si ya hay un chat activo con mensajes, mostrar pantalla de bienvenida primero
+        const currentChat = this.getCurrentChat();
+        if (currentChat && currentChat.messages.length > 0) {
+            this.showWelcomeInterface();
+            this.closeSidebar(); // Cerrar sidebar y mostrar botón flotante
+            return;
+        }
+        
         const chatId = 'chat_' + Date.now();
         const newChat = {
             id: chatId,
@@ -114,25 +172,42 @@ class AIChatbot {
             createdAt: new Date().toISOString(),
             lastActivity: new Date().toISOString()
         };
-
+    
         this.chats.unshift(newChat);
         this.currentChatId = chatId;
         this.saveChatsToStorage();
         this.renderChatHistory();
         this.showChatInterface();
-        this.closeSidebar();
+        this.closeSidebar(); // Cerrar sidebar y mostrar botón flotante
         
         // Enfocar el input
         this.messageInput.focus();
         
         console.log('💬 Nuevo chat creado:', chatId);
     }
+    
+    // ===== INICIALIZACIÓN CON VERIFICACIÓN DEL BOTÓN =====
+    static initialize() {
+        const chatbot = new AIChatbot();
+        
+        // Verificar que el botón flotante se creó correctamente
+        setTimeout(() => {
+            if (!chatbot.menuToggleBtn) {
+                console.warn('⚠️ Botón de menú flotante no se creó correctamente');
+            } else {
+                console.log('✅ Botón de menú flotante funcionando correctamente');
+            }
+        }, 100);
+        
+        return chatbot;
+    }
+    
 
     loadChat(chatId) {
         this.currentChatId = chatId;
         this.showChatInterface();
         this.renderMessages();
-        this.closeSidebar();
+        this.closeSidebar(); // Esto activará la animación del botón flotante
         
         // Actualizar estado activo en el historial
         this.renderChatHistory();
@@ -180,8 +255,10 @@ class AIChatbot {
         // Mostrar mensaje del usuario
         this.renderMessages();
         
-        // Simular respuesta de la IA (aquí conectarías con tu API de IA)
-        this.getAIResponseFromBackend(currentChat, message);
+        // Simular respuesta de la IA (usar para pruebas)
+        this.simularRespuestaIA(currentChat, message);
+        //Obtener respuesta de IA desde el backend
+        //this.getAIResponseFromBackend(currentChat, message);
         
         // Actualizar storage y historial
         currentChat.lastActivity = new Date().toISOString();
@@ -266,11 +343,12 @@ class AIChatbot {
                     <span></span><span></span><span></span>
                 </div>
             </div>
+            ${this.createAIAvatar()}
         `;
         this.chatMessages.appendChild(typingDiv);
         this.scrollToBottom();
         
-        // Agregar estilos para la animación de escritura
+        // Agregar estilos para la animación de escritura si no existen
         if (!document.getElementById('typing-styles')) {
             const style = document.createElement('style');
             style.id = 'typing-styles';
@@ -278,6 +356,9 @@ class AIChatbot {
                 .typing-animation {
                     display: flex;
                     gap: 4px;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 20px;
                 }
                 .typing-animation span {
                     width: 8px;
@@ -289,12 +370,51 @@ class AIChatbot {
                 .typing-animation span:nth-child(1) { animation-delay: -0.32s; }
                 .typing-animation span:nth-child(2) { animation-delay: -0.16s; }
                 @keyframes typing {
-                    0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
-                    40% { transform: scale(1.2); opacity: 1; }
+                    0%, 80%, 100% { 
+                        transform: scale(0.8); 
+                        opacity: 0.5; 
+                    }
+                    40% { 
+                        transform: scale(1.2); 
+                        opacity: 1; 
+                    }
                 }
             `;
             document.head.appendChild(style);
         }
+    }
+    simularRespuestaIA(chat) {
+        // Mostrar indicador de escritura
+        this.showTypingIndicator();
+        
+        setTimeout(() => {
+            this.hideTypingIndicator();
+            
+            // Respuestas de ejemplo
+            const responses = [
+                "Entiendo tu consulta. ¿Podrías proporcionarme más detalles para ayudarte mejor?",
+                "Esa es una pregunta interesante. Permíteme pensar en la mejor manera de abordar este tema.",
+                "Gracias por compartir eso conmigo. Aquí tienes mi análisis sobre el tema:",
+                "Me complace poder ayudarte con esto. Basándome en la información que me has dado...",
+                "Excelente pregunta. Te explico paso a paso cómo abordar esta situación:"
+            ];
+            
+            const aiMessage = {
+                id: 'msg_' + Date.now(),
+                type: 'ai',
+                content: responses[Math.floor(Math.random() * responses.length)],
+                timestamp: new Date().toISOString()
+            };
+            
+            chat.messages.push(aiMessage);
+            chat.lastActivity = new Date().toISOString();
+            
+            this.renderMessages();
+            this.saveChatsToStorage();
+            this.renderChatHistory();
+            
+            console.log('🤖 Respuesta de IA generada');
+        }, 1500 + Math.random() * 1000); // Tiempo variable para mayor realismo
     }
 
     hideTypingIndicator() {
@@ -308,14 +428,20 @@ class AIChatbot {
     showChatInterface() {
         this.welcomeSection.style.display = 'none';
         this.chatContainer.style.display = 'flex';
+        
+        console.log('💬 Mostrando interfaz de chat');
     }
-
     showWelcomeInterface() {
         this.welcomeSection.style.display = 'flex';
         this.chatContainer.style.display = 'none';
         this.currentChatId = null;
+        
+        // Actualizar el historial para quitar el estado activo
+        this.renderChatHistory();
+        
+        console.log('🏠 Mostrando interfaz de bienvenida');
     }
-
+    
     renderMessages() {
         const currentChat = this.getCurrentChat();
         if (!currentChat) return;
@@ -332,17 +458,29 @@ class AIChatbot {
                 messageDiv.classList.add('slide-in-left');
             }
             
-            messageDiv.innerHTML = `
-                <div class="message-content">
-                    ${this.formatMessageContent(message.content)}
-                </div>
-            `;
+            // Crear el contenido del mensaje
+            let messageHTML = `<div class="message-content">${this.formatMessageContent(message.content)}</div>`;
             
+            // Agregar avatar solo para mensajes de IA
+            if (message.type === 'ai') {
+                messageHTML += this.createAIAvatar();
+            }
+            
+            messageDiv.innerHTML = messageHTML;
             this.chatMessages.appendChild(messageDiv);
         });
         
         this.scrollToBottom();
     }
+    createAIAvatar() {
+        return `
+            <div class="ai-message-avatar">
+                <img src="assets/IApfp.jpg" alt="Evelyn Avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="ai-icon-small" style="display: none;">🤖</div>
+            </div>
+        `;
+    }
+    
 
     formatMessageContent(content) {
         // Aquí puedes agregar formateo adicional como markdown, enlaces, etc.
@@ -403,7 +541,12 @@ class AIChatbot {
     }
 
     scrollToBottom() {
-        this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+        setTimeout(() => {
+            this.chatMessages.scrollTo({
+                top: this.chatMessages.scrollHeight,
+                behavior: 'smooth'
+            });
+        }, 100); // Pequeño delay para asegurar que el DOM se haya actualizado
     }
 
     toggleVoiceMode() {
