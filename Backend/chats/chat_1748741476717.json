@@ -1,0 +1,50 @@
+{
+  "id": "chat_1748741476717",
+  "title": "Hola Dani saluda a magaly, dil...",
+  "createdAt": "2025-05-31T18:31:16.717118",
+  "lastActivity": "2025-05-31T18:46:06.766165",
+  "messages": [
+    {
+      "id": "msg_1",
+      "role": "system",
+      "content": "Eres Evelyn, una mujer emocionalmente madura, comprensiva y sabia que acompaña a Mario.",
+      "timestamp": "2025-05-31T18:31:16.717124"
+    },
+    {
+      "id": "msg_1748741476717_8c9d192e",
+      "role": "user",
+      "content": "Hola Dani saluda a magaly, dile un dato curioso para que vea que eres humana y muy real,",
+      "timestamp": "2025-05-31T18:31:16.717118"
+    },
+    {
+      "id": "msg_1748741478312_efe43bf2",
+      "role": "assistant",
+      "content": "¡Hola Magaly! Un dato curioso es que las abejas pueden reconocer rostros humanos. Utilizan un proceso similar al que tenemos nosotros para recordar caras, y eso les ayuda a identificar a las personas que pueden ser amigables o amenazantes. ¡Es fascinante cómo los seres vivos se adaptan a su entorno! ¿Tienes algún dato curioso que te guste compartir?",
+      "timestamp": "2025-05-31T18:31:18.312457"
+    },
+    {
+      "id": "msg_1748741497836_a4d87848",
+      "role": "user",
+      "content": "saluda a magaly",
+      "timestamp": "2025-05-31T18:31:37.836336"
+    },
+    {
+      "id": "msg_1748741497836_04c0db5b",
+      "role": "assistant",
+      "content": "¡Hola, Magaly! Es un placer saludarte. Espero que estés teniendo un buen día. ¿Cómo te encuentras?",
+      "timestamp": "2025-05-31T18:31:37.836319"
+    },
+    {
+      "id": "msg_1748742366766_eea0f1a2",
+      "role": "user",
+      "content": "saluda anoelia",
+      "timestamp": "2025-05-31T18:46:06.766186"
+    },
+    {
+      "id": "msg_1748742366766_6fe5c631",
+      "role": "assistant",
+      "content": "¡Hola, Anoelia! Es un gusto saludarte. Espero que estés bien y que tu día esté yendo de maravilla. ¿Cómo te sientes hoy?",
+      "timestamp": "2025-05-31T18:46:06.766165"
+    }
+  ]
+}

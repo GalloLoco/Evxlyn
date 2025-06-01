@@ -554,7 +554,127 @@ body {
         transform: scale(1) translateY(0);
     }
 }
+/* ===== ESTILOS PARA BOTÓN DE ELIMINAR CHAT ===== */
 
+.chat-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 15px;
+    margin-bottom: 8px;
+    background-color: var(--hover-gray);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    border-left: 3px solid transparent;
+}
+
+.chat-content {
+    flex: 1;
+    cursor: pointer;
+    min-width: 0; /* Para permitir text-overflow */
+}
+
+.delete-chat-btn {
+    background: none;
+    border: none;
+    color: var(--text-gray);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    opacity: 0;
+    transition: all 0.2s ease;
+    margin-left: 8px;
+    font-size: 0.9rem;
+    min-width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.delete-chat-btn:hover {
+    background-color: var(--accent-red);
+    color: var(--text-white);
+    transform: scale(1.1);
+}
+
+.chat-item:hover .delete-chat-btn {
+    opacity: 1;
+}
+
+/* Mejorar la estructura visual de cada chat item */
+.chat-item:hover {
+    background-color: var(--border-gray);
+    border-left-color: var(--accent-red);
+}
+
+.chat-item.active {
+    background-color: var(--accent-red);
+    border-left-color: var(--dark-red);
+}
+
+.chat-item.active .delete-chat-btn {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.chat-item.active .delete-chat-btn:hover {
+    background-color: var(--dark-red);
+    color: var(--text-white);
+}
+
+/* ===== ESTILOS PARA HISTORIAL VACÍO ===== */
+.empty-history {
+    padding: 20px;
+    text-align: center;
+    color: var(--text-gray);
+}
+
+.empty-history p {
+    margin: 0 0 10px 0;
+    font-size: 0.9rem;
+}
+
+.empty-history p:last-child {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+/* ===== ESTILOS PARA MENSAJES DE ERROR ===== */
+.message.error .message-content {
+    background-color: #8B1538 !important;
+    border-color: #A91B47 !important;
+    color: var(--text-white);
+}
+
+/* ===== ANIMACIONES MEJORADAS ===== */
+.chat-item {
+    animation: slideInLeft 0.3s ease-out;
+}
+
+.delete-chat-btn {
+    transition: opacity 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+
+/* ===== RESPONSIVE PARA BOTONES DE ELIMINAR ===== */
+@media (max-width: 768px) {
+    .delete-chat-btn {
+        min-width: 28px;
+        height: 28px;
+        padding: 6px;
+        font-size: 0.8rem;
+    }
+    
+    /* En móvil, mostrar siempre el botón (no solo en hover) */
+    .chat-item .delete-chat-btn {
+        opacity: 0.6;
+    }
+    
+    .chat-item:hover .delete-chat-btn,
+    .chat-item .delete-chat-btn:hover {
+        opacity: 1;
+    }
+}
 /* ===== ANIMACIONES ===== */
 .fade-in {
     animation: fadeIn 0.5s ease-in;
