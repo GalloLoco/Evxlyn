@@ -156,82 +156,109 @@ class AIChatbot {
     
     // ===== GESTIÓN DE CHATS =====
     createNewChat() {
-        // Si ya hay un chat activo con mensajes, mostrar pantalla de bienvenida primero
-        const currentChat = this.getCurrentChat();
-        if (currentChat && currentChat.messages.length > 0) {
-            this.showWelcomeInterface();
-            this.closeSidebar(); // Cerrar sidebar y mostrar botón flotante
+        console.log('🔄 Intentando crear nuevo chat...');
+        console.log('📊 Estado actual:', {
+            currentChatId: this.currentChatId,
+            enPantallaInicio: this.welcomeSection.style.display !== 'none',
+            enPantallaChat: this.chatContainer.style.display !== 'none'
+        });
+        
+        // CASO 1: Si ya estamos en la pantalla de bienvenida (sin chat activo)
+        if (!this.currentChatId && this.welcomeSection.style.display !== 'none') {
+            console.log('✅ Ya estás en la pantalla de inicio. No se requiere acción.');
+            this.closeSidebar(); // Solo cerrar el sidebar si está abierto
+            this.messageInput.focus(); // Enfocar el input para comenzar a escribir
             return;
         }
         
-        const chatId = 'chat_' + Date.now();
-        const newChat = {
-            id: chatId,
-            title: 'Nuevo Chat',
-            messages: [],
-            createdAt: new Date().toISOString(),
-            lastActivity: new Date().toISOString()
-        };
-    
-        this.chats.unshift(newChat);
-        this.currentChatId = chatId;
-        this.saveChatsToStorage();
-        this.renderChatHistory();
-        this.showChatInterface();
-        this.closeSidebar(); // Cerrar sidebar y mostrar botón flotante
+        // CASO 2: Si hay un chat activo con mensajes, ir a pantalla de bienvenida
+        const currentChat = this.getCurrentChat();
+        if (currentChat && currentChat.messages.length > 0) {
+            console.log('🏠 Regresando a la pantalla de bienvenida desde chat activo');
+            this.showWelcomeInterface();
+            this.closeSidebar();
+            return;
+        }
         
-        // Enfocar el input
-        this.messageInput.focus();
+        // CASO 3: Si hay un chat activo pero SIN mensajes, simplemente ir a bienvenida
+        if (this.currentChatId && (!currentChat || currentChat.messages.length === 0)) {
+            console.log('🔄 Chat vacío detectado, limpiando y regresando a inicio');
+            this.showWelcomeInterface();
+            this.closeSidebar();
+            return;
+        }
         
-        console.log('💬 Nuevo chat creado:', chatId);
+        // CASO 4: Crear un nuevo chat solo si realmente se necesita (esto ya no debería ejecutarse)
+        console.log('⚠️ Caso no manejado, creando nuevo chat por seguridad');
+        this.showWelcomeInterface();
+        this.closeSidebar();
     }
     
-    // ===== INICIALIZACIÓN CON VERIFICACIÓN DEL BOTÓN =====
-    static initialize() {
-        const chatbot = new AIChatbot();
-        
-        // Verificar que el botón flotante se creó correctamente
-        setTimeout(() => {
-            if (!chatbot.menuToggleBtn) {
-                console.warn('⚠️ Botón de menú flotante no se creó correctamente');
-            } else {
-                console.log('✅ Botón de menú flotante funcionando correctamente');
-            }
-        }, 100);
-        
-        return chatbot;
-    }
     
 
     loadChat(chatId) {
+        console.log('📂 Cargando chat:', chatId);
+        
+        // Verificar que el chat existe
+        const chatExists = this.chats.find(chat => chat.id === chatId);
+        if (!chatExists) {
+            console.error('❌ Error: Chat no existe:', chatId);
+            this.showWelcomeInterface();
+            return;
+        }
+        
         this.currentChatId = chatId;
         this.showChatInterface();
         this.renderMessages();
-        this.closeSidebar(); // Esto activará la animación del botón flotante
+        this.closeSidebar();
         
         // Actualizar estado activo en el historial
         this.renderChatHistory();
         
-        console.log('📂 Chat cargado:', chatId);
+        console.log('✅ Chat cargado correctamente:', chatId);
     }
 
     getCurrentChat() {
-        return this.chats.find(chat => chat.id === this.currentChatId);
+        if (!this.currentChatId) {
+            console.log('📭 No hay chat activo (currentChatId es null)');
+            return null;
+        }
+        
+        const chat = this.chats.find(chat => chat.id === this.currentChatId);
+        
+        if (!chat) {
+            console.warn('⚠️ Chat no encontrado para ID:', this.currentChatId);
+            console.log('📋 Chats disponibles:', this.chats.map(c => c.id));
+            // Limpiar ID inválido
+            this.currentChatId = null;
+            return null;
+        }
+        
+        return chat;
     }
 
     // ===== GESTIÓN DE MENSAJES =====
     sendMessage() {
         const message = this.messageInput.value.trim();
         
-        if (!message) return;
+        if (!message) {
+            console.log('❌ Mensaje vacío, no se puede enviar');
+            return;
+        }
         
-        // Si no hay chat activo, crear uno nuevo
+        console.log('📤 Enviando mensaje:', message);
+        
+        // Si no hay chat activo, crear uno nuevo AHORA (cuando realmente se necesita)
         if (!this.currentChatId) {
-            this.createNewChat();
+            console.log('💬 No hay chat activo, creando nuevo chat para el mensaje');
+            this.createRealNewChat();
         }
         
         const currentChat = this.getCurrentChat();
-        if (!currentChat) return;
+        if (!currentChat) {
+            console.error('❌ Error: No se pudo obtener el chat actual después de crearlo');
+            return;
+        }
         
         // Agregar mensaje del usuario
         const userMessage = {
@@ -252,12 +279,18 @@ class AIChatbot {
         this.messageInput.value = '';
         this.autoResizeTextarea();
         
+        // Mostrar interfaz de chat si no está visible
+        if (this.chatContainer.style.display === 'none') {
+            this.showChatInterface();
+        }
+        
         // Mostrar mensaje del usuario
         this.renderMessages();
         
-        // Simular respuesta de la IA (usar para pruebas)
+        //Obtener respuesta simulada de IA
         this.simularRespuestaIA(currentChat, message);
-        //Obtener respuesta de IA desde el backend
+        
+        // Obtener respuesta de IA desde el backend
         //this.getAIResponseFromBackend(currentChat, message);
         
         // Actualizar storage y historial
@@ -265,8 +298,27 @@ class AIChatbot {
         this.saveChatsToStorage();
         this.renderChatHistory();
         
-        console.log('📤 Mensaje enviado:', message);
+        console.log('✅ Mensaje enviado correctamente');
     }
+    createRealNewChat() {
+        const chatId = 'chat_' + Date.now();
+        const newChat = {
+            id: chatId,
+            title: 'Nuevo Chat',
+            messages: [],
+            createdAt: new Date().toISOString(),
+            lastActivity: new Date().toISOString()
+        };
+    
+        this.chats.unshift(newChat);
+        this.currentChatId = chatId;
+        this.saveChatsToStorage();
+        
+        console.log('💬 Nuevo chat creado:', chatId);
+        return newChat;
+    }
+    
+    
     async getAIResponseFromBackend(chat, userMessageContent) {
         this.showTypingIndicator();
     
@@ -432,15 +484,30 @@ class AIChatbot {
         console.log('💬 Mostrando interfaz de chat');
     }
     showWelcomeInterface() {
+        console.log('🏠 Mostrando interfaz de bienvenida');
+        
+        // Mostrar pantalla de bienvenida
         this.welcomeSection.style.display = 'flex';
         this.chatContainer.style.display = 'none';
+        
+        // IMPORTANTE: Limpiar el chat activo
         this.currentChatId = null;
         
-        // Actualizar el historial para quitar el estado activo
+        // Actualizar el historial para quitar cualquier estado activo
         this.renderChatHistory();
         
-        console.log('🏠 Mostrando interfaz de bienvenida');
+        // Limpiar el input si tiene contenido
+        this.messageInput.value = '';
+        this.autoResizeTextarea();
+        
+        // Enfocar el input para que el usuario pueda empezar a escribir
+        setTimeout(() => {
+            this.messageInput.focus();
+        }, 100);
+        
+        console.log('✅ Interfaz de bienvenida configurada correctamente');
     }
+    
     
     renderMessages() {
         const currentChat = this.getCurrentChat();
@@ -494,6 +561,8 @@ class AIChatbot {
         const sortedChats = [...this.chats].sort((a, b) => 
             new Date(b.lastActivity) - new Date(a.lastActivity)
         );
+        
+        console.log('📋 Renderizando historial. Chat activo:', this.currentChatId);
         
         sortedChats.forEach(chat => {
             const chatDiv = document.createElement('div');
