@@ -16,8 +16,29 @@ class AIChatbot {
         this.setupEventListeners();
         this.createMenuToggle();
         this.loadChatsFromBackend();
+        // Inicializar experiencia de voz
+    this.initializeVoiceExperience();
         
         console.log('🤖 AI Chatbot inicializado correctamente');
+    }
+    initializeVoiceExperience() {
+        // Esperar a que el DOM esté listo y las voces cargadas
+        if (window.evelynVoice) {
+            this.voiceExperience = window.evelynVoice;
+            this.setupVoiceIntegration();
+        } else {
+            // Esperar a que se inicialice
+            setTimeout(() => this.initializeVoiceExperience(), 500);
+        }
+    }
+    setupVoiceIntegration() {
+        console.log('🔗 Integrando experiencia de voz con chatbot');
+        
+        // Reemplazar el event listener del botón de voz existente
+        this.voiceBtn.removeEventListener('click', this.originalVoiceHandler);
+        this.voiceBtn.addEventListener('click', () => {
+            this.voiceExperience.toggleVoiceMode();
+        });
     }
 
     // ===== INICIALIZACIÓN DE ELEMENTOS DOM =====
@@ -550,6 +571,18 @@ getContextualResponse(userMessage) {
             
             // Actualizar lista de chats (para reflejar lastActivity)
             await this.loadChatsFromBackend();
+
+            // Si está en modo voz, hacer que Evelyn hable la respuesta
+        if (this.voiceExperience && this.voiceExperience.isVoiceModeActive) {
+            // Obtener la última respuesta de IA
+            const lastAIMessage = this.currentChatData.messages
+                .filter(msg => msg.role === 'assistant')
+                .pop();
+            
+            if (lastAIMessage) {
+                this.voiceExperience.handleExternalResponse(lastAIMessage.content);
+            }
+        }
             
             console.log('✅ Mensaje enviado y respuesta recibida correctamente');
             

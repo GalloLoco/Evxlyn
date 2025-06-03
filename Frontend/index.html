@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Assistant</title>
     <link rel="stylesheet" href="css/indexCss.css">
+    <link rel="stylesheet" href="css/voiceExperience.css">
 </head>
+
 <body>
     <!-- Menú lateral desplegable -->
     <div class="sidebar" id="sidebar">
@@ -30,7 +33,10 @@
                     <img src="assets/IApfp.jpg" alt="AI Assistant Avatar" class="ai-image">
                 </div>
             </div>
+            
+            
             <h1 class="welcome-message">Hola Mario,¿Como has estado?</h1>
+        
         </div>
 
         <!-- Área de chat (inicialmente oculta) -->
@@ -43,11 +49,7 @@
         <!-- Input de texto en la parte inferior -->
         <div class="input-section">
             <div class="input-container">
-                <textarea 
-                    id="messageInput" 
-                    placeholder="¿De qué quieres hablar hoy?"
-                    rows="1"
-                ></textarea>
+                <textarea id="messageInput" placeholder="¿De qué quieres hablar hoy?" rows="1"></textarea>
                 <button class="send-btn" id="sendBtn">
                     <span class="send-icon">➤</span>
                 </button>
@@ -62,5 +64,23 @@
     <div class="overlay" id="overlay"></div>
 
     <script src="javascript/indexJs.js"></script>
+    <script src="javascript/voiceExperience.js"></script>
+    <script src="javascript/voiceIntegration.js"></script>
+
+    <!-- Status de voz -->
+<div class="voice-status" id="voiceStatus">
+    Presiona el micrófono para hablar con Evelyn
+</div>
+
+<!-- Configuración de voces -->
+<div class="voice-settings" id="voiceSettings">
+    <label for="voiceSelect">Voz de Evelyn:</label>
+    <select id="voiceSelect"></select>
+    <label for="speedRange">Velocidad:</label>
+    <input type="range" id="speedRange" min="0.5" max="2" step="0.1" value="1">
+    <label for="pitchRange">Tono:</label>
+    <input type="range" id="pitchRange" min="0" max="2" step="0.1" value="1">
+</div>
 </body>
+
 </html>
