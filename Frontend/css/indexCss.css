@@ -234,11 +234,15 @@ body {
     flex: 1;
     padding: 20px;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
 
 .chat-messages {
     max-width: 800px;
     margin: 0 auto;
+    
 }
 
 .message {
